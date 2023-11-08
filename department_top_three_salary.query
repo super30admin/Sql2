@@ -1,0 +1,8 @@
+with top_salary as(
+select d.name as 'Department', e.name as 'Employee', e.salary as 'Salary', dense_rank() over (partition by d.name order by e.salary desc) as 'top_salary_rank'
+from Employee e
+inner join Department d on e.departmentId=d.id)
+
+select Department, Employee, Salary
+from top_salary
+where top_salary_rank in (1, 2, 3)
