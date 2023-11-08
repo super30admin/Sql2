@@ -1,0 +1,8 @@
+Select
+Case
+  When (id = (Select Max(id) From Seat) and mod(id, 2) = 1) then id
+  When (mod(id, 2) = 1) then id+1
+  When (mod(id, 2) = 0) then id-1
+End as id, student
+From Seat
+Order by id;
