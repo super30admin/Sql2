@@ -1,0 +1,8 @@
+Select d.name as Department, e.name as Employee, e.salary as Salary
+from Employee e
+JOIN Department d ON e.departmentId = d.id
+where (
+  select count(DISTINCT salary)
+  from Employee
+  where departmentId = e.departmentId and salary > e.salary) < 3
+order by d.name, e.salary desc;
