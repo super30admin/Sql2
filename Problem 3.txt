@@ -1,0 +1,8 @@
+Select id,
+    case
+        when p_id is null then "Root"
+        when id IN (select distinct(t.p_id) from Tree t) then "Inner"
+        else
+            "Leaf"
+        end as 'type'
+from Tree
