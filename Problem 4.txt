@@ -1,0 +1,9 @@
+with cte as (
+    select *, dense_rank()over(partition by e.departmentId order by e.salary desc) as rnk 
+    from Employee e
+    order by departmentId
+)
+Select d.name as Department, cte.name as Employee, cte.salary as Salary
+from CTE
+inner join Department d on CTE.departmentId = d.id
+where CTE.rnk < 4
