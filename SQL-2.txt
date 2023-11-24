@@ -1,0 +1,35 @@
+Question 1 :
+
+#YK_S30_Sol_1
+SELECT score , dense_rank() OVER(ORDER BY score DESC) as 'rank' 
+FROM Scores
+
+Question 2: 
+
+SELECT id , 'Root' as Type from Tree where p_id is NULL 
+UNION
+Select id, 'Leaf' as Type from Tree where id NOT IN (SELECT p_id FROM Tree WHERE p_id is not null) and p_id is not null
+UNION 
+Select id , 'Inner' as Type from Tree where id in (select p_id from tree ) AND p_id is not null
+
+Question 3 :
+
+SELECT
+(CASE WHEN id % 2 <> 0 and id =(SELECT COUNT(*) from Seat) THEN id
+WHEN id % 2 = 0 THEN id-1 
+ELSE id +1
+END ) as id
+,student 
+FROM Seat
+ORDER BY id
+
+Question 4 :
+
+WITH CTE AS (SELECT * , dense_rank() OVER (PARTITION BY departmentId ORDER BY salary DESC) as rnk 
+from Employee) 
+SELECT d.name as Department , CTE.name as Employee , CTE.salary as Salary
+FROM CTE 
+LEFT JOIN Department d
+ON CTE.departmentId = D.id
+WHERE rnk <= 3
+ORDER BY rnk
