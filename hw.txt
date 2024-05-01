@@ -1,0 +1,63 @@
+Problem 1 : Rank Scores
+
+WITH WINDOW FUNCTION 
+
+SELECT score, DENSE_RANK() OVER(ORDER BY score DESC) AS 'rank'
+FROM Scores
+
+WITHOUT WINDOW FUNCTION
+
+SELECT S1.score, (SELECT COUNT(DISTINCT S2.score) FROM Scores S2 WHERE S1.score <= S2.score) AS 'rank'
+FROM Scores S1
+ORDER BY S1.score DESC
+
+
+Problem 2 : Exchange Seats
+
+SELECT  
+    (CASE 
+        WHEN MOD(id,2) != 0 AND id != cnts THEN id + 1
+        WHEN MOD(id,2) != 0 AND id = cnts THEN id
+        ELSE id - 1
+    END) AS 'id', student
+    FROM Seat, (SELECT COUNT(*) AS cnts FROM Seat) AS seat_counts
+    ORDER BY id 
+
+
+BITWISE VERSION
+
+-- (x+1) ^ 1 - 1
+
+SELECT COALESCE(S2.id, S1.id) AS 'id',  S1.student
+FROM Seat S1 LEFT JOIN Seat S2 ON (S1.id+1) ^ 1 - 1 = S2.id
+ORDER BY id
+
+
+Problem 3 : Tree Node
+
+# Write your MySQL query statement below
+SELECT id, 'Root' AS type FROM Tree WHERE p_id IS NULL
+UNION
+SELECT id, 'Leaf' AS type FROM Tree WHERE id NOT IN (SELECT DISTINCT p_id FROM Tree WHERE p_id IS NOT NULL) AND p_id IS NOT NULL
+UNION
+SELECT id, 'Inner' AS type FROM Tree WHERE p_id IN (SELECT DISTINCT p_id FROM Tree WHERE p_id IS NOT NULL) AND id IN (SELECT p_id FROM Tree WHERE p_id IS NOT NULL)
+
+WITH CONTROL FLOW
+
+Problem 4 : Deparment Top 3 Salaries
+
+WITH WINDOW FUNCTION
+
+WITH CTE AS(
+SELECT *, DENSE_RANK() OVER(PARTITION BY departmentId ORDER BY salary DESC) AS 'rnk'
+FROM Employee)
+
+SELECT d.name AS 'Department', c.name AS 'Employee', c.salary
+FROM CTE c LEFT JOIN Department d ON c.departmentId = d.id
+WHERE c.rnk <= 3
+
+WITHOUT WINDOW FUNCTION
+
+SELECT d.name AS 'Department', e.name AS 'Employee', e.salary
+FROM Employee e LEFT JOIN Department d on e.departmentId = d.id
+WHERE 3 > (SELECT COUNT(DISTINCT e2.salary) FROM Employee e2 WHERE e.departmentId = e2.departmentId AND e2.salary > e.salary)
