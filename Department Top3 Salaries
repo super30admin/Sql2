@@ -1,0 +1,4 @@
+WITH CTE AS(SELECT e.id, e.name AS emp_name, e.salary, DENSE_RANK() OVER(PARTITION BY departmentId ORDER BY salary DESC) AS rnk, d.name AS dept_name
+FROM Employee e LEFT OUTER JOIN Department d ON e.departmentId = d.id)
+
+SELECT dept_name AS Department, emp_name AS Employee, salary AS Salary FROM CTE WHERE rnk <= 3
