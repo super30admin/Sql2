@@ -1,0 +1,33 @@
+Problem 2 : Exchange Seats
+
+select (
+    Case
+    when mod(id,2)!=0 and id!=cnt then id+1
+    when mod(id,2)!=0 and id=cnt then id
+    else id-1
+    END
+) as 'id', student from seat, (select count(*) as cnt from seat) as seat_counts
+order by id
+
+
+Problem 3 : Tree Node
+
+select id, (
+    Case
+    WHEN p_id is null then 'Root'
+    when id in (select distinct p_id from tree where p_id is not null) then 'Inner'
+    Else 'Leaf'
+END
+) as 'type' from tree
+
+
+
+Problem 4 : Department Top 3 Salaries
+
+WITH CTE AS (
+    SELECT e.name, e.departmentid, e.salary, dense_rank() over(partition by e.departmentid order by e.salary desc) as 'rnk' from employee e
+)
+
+SELECT d.name AS 'Department', c.name AS 'Employee', c.salary 
+from cte c left join department d 
+on c.departmentid=d.id where c.rnk<=3
