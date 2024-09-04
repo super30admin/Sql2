@@ -1,0 +1,10 @@
+Select id,Ifnull(
+case
+when Mod(id,2)=0 then lag_stud
+else lead_stud
+end,student) student
+from(
+Select id,student, lag(student) over (order by id) as lag_stud, 
+lead(student) over (order by id) as lead_stud
+from Seat
+) lag_lead_stud
