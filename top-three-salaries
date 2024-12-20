@@ -1,0 +1,7 @@
+with cte as ( 
+select e.name,e.salary,e.departmentid,d.name as department,dense_rank() over(partition by e.departmentid order by e.salary desc) rnk 
+from employee e  
+join  
+department d 
+on e.departmentid = d.id) 
+select department,name as employee,salary from cte where rnk <=3; 
