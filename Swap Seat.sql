@@ -1,0 +1,7 @@
+# Write your MySQL query statement below
+SELECT (
+    CASE 
+    WHEN MOD(S.ID,2) !=0 AND S.ID != C.CNT THEN S.ID + 1
+    WHEN MOD(S.ID,2) !=0 AND S.ID = C.CNT THEN S.ID
+    ELSE S.ID - 1
+END) AS ID, S.STUDENT FROM SEAT S, (SELECT COUNT(*) AS CNT FROM SEAT ORDER BY ID) AS C ORDER BY ID;
