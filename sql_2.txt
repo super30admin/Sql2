@@ -1,0 +1,37 @@
+Q1:
+SELECT score, DENSE_RANK() over(ORDER BY score DESC) as 'rank' from Scores
+
+Q2:
+SELECT(
+    CASE
+        WHEN mod(id,2)=0 AND id!=counts then id-1
+        WHEN mod(id,2)=0 AND mod(counts,2)=0 and id=counts then id-1
+        WHEN mod(id,2)!=0 AND id!=counts then id+1
+        ELSE id
+END) as id, student from seat, (SELECT COUNT(*) as counts from seat) as alias order by id
+
+Q3:
+SELECT id,(
+    CASE
+        WHEN p_id is null then 'Root'
+        WHEN id not in (SELECT p_id from tree where p_id is not null) then 'Leaf'
+        ELSE 'Inner'
+    end
+) as 'Type' from tree 
+
+Q4:
+SELECT
+    d.name AS Department,
+    e.name AS Employee,
+    e.salary AS Salary
+FROM
+    Employee e
+    JOIN Department d ON e.departmentId = d.id
+WHERE
+    (
+        SELECT COUNT(DISTINCT salary)
+        FROM Employee e2
+        WHERE e2.departmentId = e.departmentId AND e2.salary >= e.salary
+    ) <= 3
+ORDER BY
+    Department, Salary DESC;
