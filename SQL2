@@ -1,0 +1,25 @@
+Q1. Rank Scores 
+# Write your MySQL query statement b
+SELECT Score, Dense_Rank() over 
+    (order by score Desc) AS 'RANK' from Scores;
+
+Q2. Exchange Seats 
+# Write your MySQL query statement below
+SELECT 
+    CASE 
+        WHEN MOD(id, 2) != 0 AND id != cnt THEN id + 1
+        WHEN MOD(id, 2) != 0 AND id = cnt THEN id
+        ELSE id - 1
+    END AS id, 
+    student FROM Seat, (SELECT COUNT(*) AS cnt FROM Seat) AS seat_counts ORDER BY id;
+
+Q.3 Tree Node 
+# Write your MySQL query statement below
+SELECT id, (
+    CASE
+        when  p_id IS NULL then 'Root'
+        when id NOT IN(Select Distinct p_id from Tree WHERE 
+                        p_id is NOT NULL) then 'Leaf'
+        ELSE 'Inner'
+        END
+) AS 'type' from Tree;
