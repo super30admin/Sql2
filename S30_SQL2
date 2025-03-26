@@ -1,0 +1,111 @@
+# RankScores_SOLUTION_Q1
+
+# we can use cte as well
+
+SELECT score, DENSE_RANK() OVER (ORDER BY score DESC) AS `rank`
+FROM scores;
+
+# Alternative 1
+
+SELECT s1.score, (SELECT COUNT(DISTINCT s2.score) FROM scores s2 WHERE s2.score >= s1.score) AS 'rank'
+FROM scores s1
+ORDER BY s1.score DESC;
+
+# Alternative 2
+
+SELECT s.score, COUNT(DISTINCT T.score)  AS 'rank' 
+FROM scores s 
+INNER JOIN scores T ON T.score >= s.score
+GROUP BY s.score, s.id
+ORDER BY s.score DESC;
+
+# Alternative 3
+
+# correlated subquery- it is a subquery referencing the outer query
+ 
+SELECT s1.score, (SELECT COUNT(DISTINCT s2.score) FROM scores s2 WHERE s2.score >= s1.score) AS 'rank'
+FROM scores s1
+ORDER BY s1.score DESC;
+
+----------------------------------------------
+
+# ExchangeSeats_SOLUTION_Q2
+
+# Mod, Count, Flow control statement
+
+SELECT(
+    CASE WHEN mod(id,2)!=0 AND id!=cnt THEN id+1
+        WHEN mod(id,2)!=0 AND id=cnt  THEN id
+    ELSE id-1
+    END) AS 'id', student FROM seat, (SELECT COUNT(*) AS cnt FROM seat) AS seat_counts
+ORDER BY id;
+
+
+# Alternative 1
+
+WITH cte AS(
+SELECT *, LEAD(id) OVER(ORDER BY id) AS NEXT, LAG(id) OVER(ORDER BY id) AS PREV FROM seat
+)
+SELECT CASE WHEN((id%2= 1) AND NEXT IS NOT NULL) THEN NEXT
+            WHEN (id%2= 0) THEN PREV
+            ELSE id END AS id, student
+FROM cte
+ORDER BY student;
+
+# Alternative 2
+
+SELECT s1.id, COALESCE( s2.student, s1.student) AS 'student'
+FROM seat s1
+LEFT JOIN seat s2 ON (s1.id+1)^1 - 1= s2.id;
+
+# Alternative 3
+
+# bitwise operator XOR (x+1)^1-1; Use COALESCE and JOIN
+
+SELECT s1.id, COALESCE( s2.student, s1.student) AS 'student'
+FROM seat s1
+LEFT JOIN seat s2 ON (s1.id+1)^1 - 1= s2.id;
+
+----------------------------------------------
+
+# TreeNode_Solution_Q3
+
+SELECT id, 'Root' As type FROM tree Where p_id IS NULL
+UNION
+SELECT id, 'Leaf' AS type FROM tree WHERE id NOT IN (SELECT DISTINCT p_id FROM tree WHERE p_id IS NOT NULL)  AND p_id IS NOT NULL
+UNION
+SELECT id, 'Inner' AS type FROM tree WHERE id IN (SELECT DISTINCT p_id FROM tree WHERE p_id IS NOT NULL) AND p_id IS NOT NULL;
+
+
+# Alternative 
+
+# short circuiting (switch case)
+
+SELECT tree.id, 
+CASE
+    WHEN tree.p_id IS NULL THEN 'Root'
+    WHEN tree.id NOT IN (SELECT p_id FROM tree WHERE p_id IS NOT NULL) THEN 'Leaf'
+    ELSE 'Inner'
+    END AS 'type'
+FROM tree;
+
+----------------------------------------------
+
+# DepartmentTop3Salaries_Solution_Q4
+
+# without the use of window fn
+
+SELECT d.name AS 'Department', e.name AS 'Employee', e.salary 
+FROM Employee e
+LEFT JOIN Department d ON e.departmentId = d.id 
+WHERE 3 > (SELECT COUNT(DISTINCT e2.salary) FROM Employee e2 WHERE e2.salary > e.salary AND e.departmentId = e2.departmentId);
+
+# Alternative1
+
+# using Dense rank and Left join
+
+WITH cte AS(
+    SELECT e.name, e.departmentId, e.salary, DENSE_RANK() OVER(PARTITION BY e.departmentId ORDER BY e.salary DESC) AS 'rank' FROM Employee e
+)
+SELECT d.name AS 'Department', c.name AS 'Employee', c.salary FROM cte c
+LEFT JOIN Department d ON c.departmentId = d.id WHERE c.rank < 4; 
