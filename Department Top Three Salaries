@@ -1,0 +1,13 @@
+WITH top_sal AS (
+    SELECT  DISTINCT departmentid,
+            (CASE WHEN DENSE_RANK() OVER(PARTITION BY departmentid ORDER BY salary DESC) <= 3 THEN salary END) top_3_sal
+    FROM employee
+)
+SELECT  DISTINCT d.name AS department,
+        e.name AS employee,
+        e.salary
+FROM employee e
+LEFT JOIN department d
+ON e.departmentid = d.id
+INNER JOIN top_sal t
+ON e.departmentid = t.departmentid AND e.salary = t.top_3_sal AND t.top_3_sal IS NOT NULL
